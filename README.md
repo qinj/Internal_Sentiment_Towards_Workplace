@@ -1,13 +1,7 @@
 # Internal Sentiment towards Workplace
 
-Topics included in this case study include:
-* Classification modeling.
-* Programming Practice: Handing off models.
-* Web applications.
-* Website hosting with AWS
-* Deploying a DS application.
-* Data visualization.
-* Results presentation.
+At a company with stock, internal members usually are given a portion of stock in their contract. The models in this repository will predict the average member's overall view of the company they are working for. This model will use stock price, sentiment analysis, and other features to try and predict if the average member recommends the company, has a positive outlook, or approves of the CEO.
+
 
 #### Architecture
 ![Architecture of web app](img/webapp_flowchart.png)
