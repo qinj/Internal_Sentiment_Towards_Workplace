@@ -78,7 +78,9 @@ def extract_bow_from_column(column):
     return filtered_column
 
 def create_Xy_csv(filepath):
-    """ filepath = ../data/clean_amazon_reviews.csv """
+    """ filepath = ../data/clean_amazon_reviews.csv
+        creates the X and y csv files: df_with_nlp.csv and work-balance-stars.csv
+    """
     amazon_df = pd.read_csv(filepath)
     amazon_df['pros'] = amazon_df['pros'].str.lower()
     amazon_df['filtered_pros'] = extract_bow_from_column(amazon_df['pros'])
