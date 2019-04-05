@@ -14,7 +14,7 @@ These instructions will get you a copy of the project up and running on your loc
 Fork the code from my repository and go to a location where you want to save the code, then clone the code to your computer:
 
 ```
-git clone https://github.com/qinj/Internal_Sentiment_Towards_Workplace.git
+git clone https://github.com/<your-username>/Internal_Sentiment_Towards_Workplace.git
 ```
 Go into the project directory:
 ```
@@ -47,6 +47,12 @@ The unit tests are written in such a way that they will find the python packages
 set PYTHONPATH=%PYTHONPATH%; .\
 ```
 #### Architecture
+Preprocessing
+
+![Architecture of web app](img/preprocessing.png)
+
+WebApp Architecture
+
 ![Architecture of web app](img/webapp_flowchart.png)
 
 
