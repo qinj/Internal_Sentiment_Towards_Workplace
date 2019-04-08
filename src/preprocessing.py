@@ -197,22 +197,41 @@ def preprocessing_nlp(filepath):
         creates the X and y csv files: df_with_nlp.csv and work-balance-stars.csv
     """
     amazon_df = pd.read_csv(filepath)
+
+    # PROS
     amazon_df['pros'] = amazon_df['pros'].str.lower()
     amazon_df['filtered_pros'] = extract_bow_from_column(amazon_df['pros'])
     corpus_pros = [row for row in amazon_df['filtered_pros']]
-    cv = CountVectorizer(max_features=2000)
-    cv_array = cv.fit_transform(corpus_pros).toarray()
-    cv_dict = {}
+    cv_pros = CountVectorizer(max_features=2000)
+    cv_array_pros = cv_pros.fit_transform(corpus_pros).toarray()
+    cv_dict_pros = {}
     i = 0
-    for key in cv.vocabulary_:
-        cv_dict["word_" + key] = cv_array[:,i]
+    for key in cv_pros.vocabulary_:
+        cv_dict_pros["word_" + key] = cv_array_pros[:,i]
         i += 1
-    cv_df = pd.DataFrame(cv_dict)
+    cv_df_pros = pd.DataFrame(cv_dict_pros)
+
+    # CONS
+    amazon_df['cons'] = amazon_df['cons'].str.lower()
+    amazon_df['filtered_cons'] = extract_bow_from_column(amazon_df['cons'])
+    corpus_cons = [row for row in amazon_df['filtered_cons']]
+    cv_cons = CountVectorizer(max_features=2000)
+    cv_array_cons = cv_cons.fit_transform(corpus_cons).toarray()
+    cv_dict_cons = {}
+    i = 0
+    for key in cv_cons.vocabulary_:
+        cv_dict_cons["word_" + key] = cv_array_cons[:,i]
+        i += 1
+    cv_df_cons = pd.DataFrame(cv_dict_cons)
+
+    
     non_nlp_df = amazon_df[['culture-values-stars', 'career-opportunities-stars',
                        'comp-benefit-stars', 'senior-management-stars', 'helpful-count',
                        'is_current_employee', 'year', 'quarter', 'amazon_earnings_this_quarter']]
 
-    new_df = pd.concat([non_nlp_df, cv_df], axis=1)
+    new_df = pd.concat([non_nlp_df, cv_df_pros, cv_df_cons], axis=1)
+    new_df['timesteps'] = (new_df['year'].apply(str).str[2:4] + new_df['quarter'].apply(str))
+    new_df.sort_values(by=['timesteps'], inplace=True)
     new_df.to_csv("../data/df_with_nlp.csv")
     amazon_df['work-balance-stars'].to_csv("../data/work-balance-stars.csv")
     return
