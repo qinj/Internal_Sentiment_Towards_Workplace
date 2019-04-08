@@ -49,7 +49,7 @@ set PYTHONPATH=%PYTHONPATH%; .\
 #### Architecture
 Preprocessing
 
-![Architecture of web app](img/preprocessing.png)
+![Preprocessing](img/preprocessing.png)
 
 WebApp Architecture
 
