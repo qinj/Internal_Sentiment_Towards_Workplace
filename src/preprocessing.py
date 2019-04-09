@@ -14,15 +14,13 @@ from nltk.stem.snowball import SnowballStemmer
 from nltk.util import ngrams
 from nltk import pos_tag
 from nltk import RegexpParser
+from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import cross_val_score, train_test_split, GridSearchCV
 from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
 from sklearn.metrics import mean_squared_error
-
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import HashingVectorizer
-
 import pickle
-
 
 ################################################################################
 #                                                                              #
@@ -110,6 +108,9 @@ def preprocessing_create_amazon_with_earnings(glassdoor_filepath, amazon_earning
     career_mean = np.nanmean(amazon_reviews_df['career-opportunities-stars'])
     benefit_mean = np.nanmean(amazon_reviews_df['comp-benefit-stars'])
     senior_mean = np.nanmean(amazon_reviews_df['senior-management-stars'])
+    # standardized
+    average_df = pd.DataFrame({'overall': 0, 'work_balance': 0, 'culture': 0, 'career': 0, 'comp_benefits': 0, 'senior': 0}, index=[0])
+    average_df.to_csv("../data/average_stars.csv", index=False)
 
     for i, row in amazon_reviews_df.iterrows():
         if row['overall-ratings'] != row['overall-ratings']:
@@ -207,9 +208,10 @@ def preprocessing_nlp(filepath):
     cv_dict_pros = {}
     i = 0
     for key in cv_pros.vocabulary_:
-        cv_dict_pros["word_" + key] = cv_array_pros[:,i]
-        i += 1
+        cv_dict_pros["word_pro_" + key] = cv_array_pros[:,cv_pros.vocabulary_[key]]
     cv_df_pros = pd.DataFrame(cv_dict_pros)
+    with open('models/vectorizer_pros.pkl', 'wb') as f:
+        pickle.dump(cv_pros, f)
 
     # CONS
     amazon_df['cons'] = amazon_df['cons'].str.lower()
@@ -218,20 +220,28 @@ def preprocessing_nlp(filepath):
     cv_cons = CountVectorizer(max_features=2000)
     cv_array_cons = cv_cons.fit_transform(corpus_cons).toarray()
     cv_dict_cons = {}
-    i = 0
     for key in cv_cons.vocabulary_:
-        cv_dict_cons["word_" + key] = cv_array_cons[:,i]
-        i += 1
+        cv_dict_cons["word_con_" + key] = cv_array_cons[:,cv_cons.vocabulary_[key]]
     cv_df_cons = pd.DataFrame(cv_dict_cons)
+    with open('models/vectorizer_cons.pkl', 'wb') as f:
+        pickle.dump(cv_cons, f)
 
-    
     non_nlp_df = amazon_df[['culture-values-stars', 'career-opportunities-stars',
                        'comp-benefit-stars', 'senior-management-stars', 'helpful-count',
                        'is_current_employee', 'year', 'quarter', 'amazon_earnings_this_quarter']]
 
     new_df = pd.concat([non_nlp_df, cv_df_pros, cv_df_cons], axis=1)
     new_df['timesteps'] = (new_df['year'].apply(str).str[2:4] + new_df['quarter'].apply(str))
-    new_df.sort_values(by=['timesteps'], inplace=True)
-    new_df.to_csv("../data/df_with_nlp.csv")
+
+
+    scaled_features = new_df.copy()
+    col_names = ['culture-values-stars', 'career-opportunities-stars', 'comp-benefit-stars',
+                'senior-management-stars', 'helpful-count', 'amazon_earnings_this_quarter']
+    features = scaled_features[col_names]
+    sc = StandardScaler()
+    features = sc.fit_transform(features.values)
+    scaled_features[col_names] = features
+    scaled_features.sort_values(by=['timesteps'], inplace=True)
+    scaled_features.to_csv("../data/df_with_nlp.csv")
     amazon_df['work-balance-stars'].to_csv("../data/work-balance-stars.csv")
     return
