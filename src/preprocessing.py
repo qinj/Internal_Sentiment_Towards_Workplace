@@ -11,15 +11,8 @@ from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 from nltk.stem.porter import PorterStemmer
 from nltk.stem.snowball import SnowballStemmer
-from nltk.util import ngrams
-from nltk import pos_tag
-from nltk import RegexpParser
 from sklearn.preprocessing import StandardScaler
-from sklearn.model_selection import cross_val_score, train_test_split, GridSearchCV
-from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
-from sklearn.metrics import mean_squared_error
 from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.feature_extraction.text import HashingVectorizer
 import pickle
 
 ################################################################################
@@ -223,6 +216,8 @@ def preprocessing_nlp(filepath):
     cv_df_pros = pd.DataFrame(cv_dict_pros)
     with open('models/vectorizer_pros.pkl', 'wb') as f:
         pickle.dump(cv_pros, f)
+    # Add length of pro review as feature
+    amazon_df['pros_len'] = amazon_df['pros'].str.len()
 
     # CONS
     amazon_df['cons'] = amazon_df['cons'].str.lower()
@@ -236,9 +231,9 @@ def preprocessing_nlp(filepath):
     cv_df_cons = pd.DataFrame(cv_dict_cons)
     with open('models/vectorizer_cons.pkl', 'wb') as f:
         pickle.dump(cv_cons, f)
-
-    amazon_df['pros_len'] = amazon_df['pros'].str.len()
+    # Add length of con review as feature
     amazon_df['cons_len'] = amazon_df['cons'].str.len()
+
     # Concat DFs
     non_nlp_df = amazon_df[['culture-values-stars', 'career-opportunities-stars',
                        'comp-benefit-stars', 'senior-management-stars', 'helpful-count',
@@ -256,10 +251,11 @@ def preprocessing_nlp(filepath):
     scaled_features[col_names] = features
 
     # OHE Categorical Features
-    scaled_features = pd.get_dummies(scaled_features,
-                                     prefix=['culture-values-stars', 'career-opportunities-stars', 'comp-benefit-stars', 'senior-management-stars'],
-                                     columns=['culture-values-stars', 'career-opportunities-stars', 'comp-benefit-stars', 'senior-management-stars'])
-    scaled_features.sort_values(by=['timesteps'], inplace=True)
+    # scaled_features = pd.get_dummies(scaled_features,
+    #                                  prefix=['culture-values-stars', 'career-opportunities-stars', 'comp-benefit-stars', 'senior-management-stars'],
+    #                                  columns=['culture-values-stars', 'career-opportunities-stars', 'comp-benefit-stars', 'senior-management-stars'])
+
+    # new_df.sort_values(by=['timesteps'], inplace=True)
     scaled_features.to_csv("../data/df_with_nlp.csv")
     amazon_df['work-balance-stars'].to_csv("../data/work-balance-stars.csv")
     return
