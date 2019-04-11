@@ -21,12 +21,50 @@
 			    req.bind('complete', show_results)
 			    req.open('POST', '/predict', True)
 			    req.set_header('content-type','application/json')
-			    data = json.dumps({'pros': document['pros'].value, 'cons':document['cons'].value})
+			    data = json.dumps({'pros': document['pros'].value, 'cons':document['cons'].value, 'culture': document['culture'].value, 'benefits': document['benefits'].value, 'career': document['career'].value, 'senior': document['senior'].value})
 			    req.send(data)
 			document["predict_button"].bind("click", get_prediction)
 
 			</script>
 		<p>How do you feel about the company?</p>
+		<div class="opinions">
+			<p>How do you feel about the culture values?</p>
+			<select id="culture">
+				<option value="1">1</option>
+  			<option value="2">2</option>
+  			<option value="3">3</option>
+  			<option value="4">4</option>
+  			<option value="5">5</option>
+			</select>
+
+
+			<p>How do you feel about the company benefits?</p>
+			<select id="benefits">
+				<option value="1">1</option>
+  			<option value="2">2</option>
+  			<option value="3">3</option>
+  			<option value="4">4</option>
+  			<option value="5">5</option>
+			</select>
+
+			<p>How do you feel about the career opportunities?</p>
+			<select id="career">
+				<option value="1">1</option>
+  			<option value="2">2</option>
+  			<option value="3">3</option>
+  			<option value="4">4</option>
+  			<option value="5">5</option>
+			</select>
+
+			<p>How do you feel about the senior management?</p>
+			<select id="senior">
+				<option value="1">1</option>
+  			<option value="2">2</option>
+  			<option value="3">3</option>
+  			<option value="4">4</option>
+  			<option value="5">5</option>
+			</select>
+		</div>
     <textarea id="pros" placeholder="Pros of the company..."></textarea>
     <textarea id="cons" placeholder="Cons of the company..."></textarea>
 		<button id="predict_button">Predict!</button>
