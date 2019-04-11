@@ -1,6 +1,6 @@
 # Internal Sentiment towards Workplace
 
-At a company with stock, internal members usually are given a portion of stock in their contract. The models in this repository will predict the average member's  view of the company through 2 predictors, work/life balance and CEO approval. This model will use quarterly earnings, stock price, sentiment analysis, and other features to try and predict.
+At a company with stock, internal members usually are given a portion of stock in their contract. The models in this repository will predict the average member's view of work/life balance. This model will use quarterly earnings, stock price, sentiment analysis, and other features to predict.
 
 ## Getting Started
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
