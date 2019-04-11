@@ -88,13 +88,19 @@ def preprocessing_create_amazon_with_earnings(glassdoor_filepath, amazon_earning
     q_earnings_df = pd.read_csv(amazon_earnings_filepath)
     amazon_reviews_df = glassdoor_df[glassdoor_df['company'] == 'amazon']
     earnings_list = []
+    stock_list = []
     for _, row in amazon_reviews_df.iterrows():
         net_income = q_earnings_df['Quarterly Net Income (Billions)'].loc[(q_earnings_df['Quarter'] == row['quarter']) & (q_earnings_df['Year'] == row['year'])]
+        stock_price = q_earnings_df['Stock Price'].loc[(q_earnings_df['Quarter'] == row['quarter']) & (q_earnings_df['Year'] == row['year'])]
         if len(net_income.values) > 0:
             earnings_list.append(net_income.values[0])
+        if len(stock_price.values) > 0:
+            stock_list.append(stock_price.values[0])
         else:
             earnings_list.append(None)
-    amazon_reviews_df['amazon_earnings_this_quarter'] = earnings_list
+            stock_list.append(None)
+    amazon_reviews_df['amazon_earnings_this_quarter'] = pd.Series(earnings_list)
+    amazon_reviews_df['stock_price'] = pd.Series(stock_list)
     # overall_mean = np.nanmean(amazon_reviews_df['overall-ratings'])
     # work_balance_mean = np.nanmean(amazon_reviews_df['work-balance-stars'])
     # culture_mean = np.nanmean(amazon_reviews_df['culture-values-stars'])
@@ -108,8 +114,6 @@ def preprocessing_create_amazon_with_earnings(glassdoor_filepath, amazon_earning
     benefit_mean = 3
     senior_mean = 3
     # standardized
-    average_df = pd.DataFrame({'overall': 0, 'work_balance': 0, 'culture': 0, 'career': 0, 'comp_benefits': 0, 'senior': 0}, index=[0])
-    average_df.to_csv("../data/average_stars.csv", index=False)
     incomplete_review = []
     for i, row in amazon_reviews_df.iterrows():
         is_null = 0
@@ -237,17 +241,20 @@ def preprocessing_nlp(filepath):
     # Concat DFs
     non_nlp_df = amazon_df[['culture-values-stars', 'career-opportunities-stars',
                        'comp-benefit-stars', 'senior-management-stars', 'helpful-count',
-                       'is_current_employee', 'year', 'quarter', 'amazon_earnings_this_quarter', 'incomplete_review', 'pros_len', 'cons_len']]
+                       'is_current_employee', 'year', 'quarter', 'amazon_earnings_this_quarter', 'stock_price', 'incomplete_review', 'pros_len', 'cons_len']]
 
     new_df = pd.concat([non_nlp_df, cv_df_pros, cv_df_cons], axis=1)
+    new_df['pro-con-len-ratio'] = new_df['pros_len']/new_df['cons_len']
     new_df['timesteps'] = (new_df['year'].apply(str).str[2:4] + new_df['quarter'].apply(str))
 
     # Standardize Features
     scaled_features = new_df.copy()
-    col_names = ['helpful-count', 'amazon_earnings_this_quarter', 'pros_len', 'cons_len']
+    col_names = ['helpful-count', 'amazon_earnings_this_quarter', 'stock_price', 'pros_len', 'cons_len', 'pro-con-len-ratio']
     features = scaled_features[col_names]
     sc = StandardScaler()
     features = sc.fit_transform(features.values)
+    with open('models/standardizer.pkl', 'wb') as f:
+        pickle.dump(sc, f)
     scaled_features[col_names] = features
 
     # OHE Categorical Features

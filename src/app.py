@@ -17,6 +17,8 @@ with open('models/vectorizer_pros.pkl', 'rb') as f:
     cv_pros = pickle.load(f)
 with open('models/vectorizer_cons.pkl', 'rb') as f:
     cv_cons = pickle.load(f)
+with open('models/standardizer.pkl', 'rb') as f:
+    sc = pickle.load(f)
 
 app = Flask(__name__, static_url_path="")
 
@@ -57,6 +59,7 @@ def predict():
     df['helpful-count'] = pd.Series([0])
     df['is_current_employee'] = pd.Series([1])
     df['amazon_earnings_this_quarter'] = pd.Series([3.027])
+    df['stock_price'] = pd.Series([1501.97])
     df['year'] = pd.Series([2018])
     df['quarter'] = pd.Series([4])
     df['incomplete_review'] = pd.Series([0])
@@ -64,12 +67,19 @@ def predict():
     df['cons_len'] = pd.Series([len(data['cons'])])
     non_nlp_df = df[['culture-values-stars', 'career-opportunities-stars',
                        'comp-benefit-stars', 'senior-management-stars', 'helpful-count',
-                       'is_current_employee', 'year', 'quarter', 'amazon_earnings_this_quarter', 'incomplete_review', 'pros_len', 'cons_len']]
+                       'is_current_employee', 'year', 'quarter', 'amazon_earnings_this_quarter', 'stock_price', 'incomplete_review', 'pros_len', 'cons_len']]
     new_df = pd.concat([non_nlp_df, cv_df_pros, cv_df_cons], axis=1)
     new_df['timesteps'] = pd.Series([184])
+    new_df['pro-con-len-ratio'] = new_df['pros_len']/new_df['cons_len']
+
+    # Standardize continuous variables
+    col_names = ['helpful-count', 'amazon_earnings_this_quarter', 'stock_price', 'pros_len', 'cons_len', 'pro-con-len-ratio']
+    features = new_df[col_names]
+    features = sc.transform(features.values)
+    new_df[col_names] = features
     new_df = new_df.reindex(sorted(new_df.columns), axis=1)
     prediction = model.predict(new_df)
-    return jsonify({'probability': prediction.tolist()})
+    return jsonify({'Projected Work/Life Balance Score': prediction.tolist()})
 
 @app.route('/')
 def index():
