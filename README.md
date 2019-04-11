@@ -58,6 +58,6 @@ WebApp Architecture
 
 #### Deliverables
 
-* A dashboard for C-suite Team Leaders to use which informs them about how their team members feeling about the workplace. This will pull in new data quarterly, and update a useful display for the Team Leader. How you use these predictions is up to you.
+* A Web Application for Team Leaders or C-Suite members to use which informs them about how their team members feeling about the workplace. This will pull in new data quarterly, and update a useful display for the Team Leader. These predictions are helpful in deciding how to adjust the work/life balance for the employees.
 
 #### Notes
