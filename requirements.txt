@@ -1,0 +1,12 @@
+scikit-learn==0.20.3
+pandas==0.24.2
+numpy==1.15.4
+nltk==3.2.5
+keras-applications==1.0.4
+keras-preprocessing==1.0.2
+keras==2.2.4
+jupyter==1.0.0
+py-xgboost==0.80
+requests==2.21.0
+scipy==1.2.1
+matplotlib==3.0.3
