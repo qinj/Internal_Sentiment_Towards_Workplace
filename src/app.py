@@ -70,7 +70,7 @@ def predict():
                        'is_current_employee', 'year', 'quarter', 'amazon_earnings_this_quarter', 'stock_price', 'incomplete_review', 'pros_len', 'cons_len']]
     new_df = pd.concat([non_nlp_df, cv_df_pros, cv_df_cons], axis=1)
     new_df['timesteps'] = pd.Series([184])
-    new_df['pro-con-len-ratio'] = new_df['pros_len']/new_df['cons_len']
+    new_df['pro-con-len-ratio'] = new_df['pros_len']/(new_df['cons_len'] + 0.00000000000000000001)
 
     # Standardize continuous variables
     col_names = ['helpful-count', 'amazon_earnings_this_quarter', 'stock_price', 'pros_len', 'cons_len', 'pro-con-len-ratio']
@@ -79,7 +79,8 @@ def predict():
     new_df[col_names] = features
     new_df = new_df.reindex(sorted(new_df.columns), axis=1)
     prediction = model.predict(new_df)
-    return jsonify({'Projected Work/Life Balance Score': prediction.tolist()})
+    prediction = round(prediction.tolist()[0], 2)
+    return jsonify({'prediction': prediction})
 
 @app.route('/')
 def index():

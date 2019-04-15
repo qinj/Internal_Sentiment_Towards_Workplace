@@ -1,6 +1,9 @@
-<html>
+<!doctype html>
+<html lang="en">
 	<head>
 		<title>Work/Life Balance</title>
+		<link rel="stylesheet" href="css/bootstrap.min.css">
+		<link rel="stylesheet" href="css/style.css">
 		<script type="text/javascript" src="brython.js"></script>
 		<script type="text/javascript" src="brython_stdlib.js"></script>
 	</head>
@@ -9,12 +12,12 @@
 			<script type="text/python3">
 			from browser import document, ajax, alert
 			import json
-			# import warnings
+			import warnings
 			def show_results(response):
 			    if response.status==200 or response.status==0:
-			        document["result"].html = response.text
-			    # else:
-			    #     warnings.warn(response.text)
+							document["result"].html = "Projected Work/Life Balance Score (1-5): " + str(json.loads(response.text)["prediction"])
+			    else:
+			        warnings.warn(response.text)
 			def get_prediction(ev):
 			    """Get the predicted probability."""
 			    req = ajax.ajax()
@@ -26,50 +29,55 @@
 			document["predict_button"].bind("click", get_prediction)
 
 			</script>
+		<div class="container">
 		<h1>How is Amazon treating you?</h1>
-		<div class="opinions">
-			<p>How do you feel about the culture values?</p>
-			<select id="culture">
-				<option value="1">1</option>
-  			<option value="2">2</option>
-  			<option value="3">3</option>
-  			<option value="4">4</option>
-  			<option value="5">5</option>
-			</select>
-
-
-			<p>How do you feel about the company benefits?</p>
-			<select id="benefits">
-				<option value="1">1</option>
-  			<option value="2">2</option>
-  			<option value="3">3</option>
-  			<option value="4">4</option>
-  			<option value="5">5</option>
-			</select>
-
-			<p>How do you feel about the career opportunities?</p>
-			<select id="career">
-				<option value="1">1</option>
-  			<option value="2">2</option>
-  			<option value="3">3</option>
-  			<option value="4">4</option>
-  			<option value="5">5</option>
-			</select>
-
-			<p>How do you feel about the senior management?</p>
-			<select id="senior">
-				<option value="1">1</option>
-  			<option value="2">2</option>
-  			<option value="3">3</option>
-  			<option value="4">4</option>
-  			<option value="5">5</option>
-			</select>
 		</div>
-		<h4>Pros</h4>
-    <textarea id="pros" placeholder="Pros of the company..."></textarea>
-		<h4>Cons</h4>
-    <textarea id="cons" placeholder="Cons of the company..."></textarea>
-		<button id="predict_button">Predict!</button>
-		<div id="result"></div>
+		<div id="opinions" class="form-group">
+			<div class="container">
+				<p>How do you feel about the culture values?
+				<select id="culture">
+					<option value="1">1</option>
+	  			<option value="2">2</option>
+	  			<option value="3">3</option>
+	  			<option value="4">4</option>
+	  			<option value="5">5</option>
+				</select>
+				</p>
+
+				<p>How do you feel about the company benefits?
+				<select id="benefits">
+					<option value="1">1</option>
+	  			<option value="2">2</option>
+	  			<option value="3">3</option>
+	  			<option value="4">4</option>
+	  			<option value="5">5</option>
+				</select>
+				</p>
+				<p>How do you feel about the career opportunities?
+				<select id="career">
+					<option value="1">1</option>
+	  			<option value="2">2</option>
+	  			<option value="3">3</option>
+	  			<option value="4">4</option>
+	  			<option value="5">5</option>
+				</select>
+				</p>
+				<p>How do you feel about the senior management?
+				<select id="senior">
+					<option value="1">1</option>
+	  			<option value="2">2</option>
+	  			<option value="3">3</option>
+	  			<option value="4">4</option>
+	  			<option value="5">5</option>
+				</select>
+				</p>
+		    <textarea id="pros" class="form-group" rows="3" cols="50" placeholder="Pros of the company..."></textarea>
+		    <textarea id="cons" class="form-group" rows="3" cols="50" placeholder="Cons of the company..."></textarea>
+				<br></br>
+				<button id="predict_button" class="btn btn-primary">Predict!</button>
+				<br></br>
+			<div id="result" class="container"></div>
+		</div>
+		</div>
 	</body>
 </html>
