@@ -19,9 +19,9 @@ from keras.layers import Dropout
 from keras.callbacks import ModelCheckpoint
 
 def create_train_test_data():
-    nlp_df = pd.read_csv('../data/df_with_nlp.csv', index_col=0)
+    nlp_df = pd.read_csv('data/df_with_nlp.csv', index_col=0)
     X = nlp_df
-    y = pd.read_csv("../data/work-balance-stars.csv", header=None, index_col=0).values
+    y = pd.read_csv("data/work-balance-stars.csv", header=None, index_col=0).values
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=0)
     X_train = X_train.reindex(sorted(X.columns), axis=1)
     X_test = X_test.reindex(sorted(X.columns), axis=1)
@@ -37,7 +37,7 @@ def random_forest_model(RF_model, X_test, y_test):
     rmse = mse ** 0.5
     mae = np.mean(np.abs(y_test - y_pred))
     log_cosh = logcosh(y_test, y_pred)
-    return rmse, mse, mae, log_cosh
+    return round(rmse, 2), round(mse, 2), round(mae, 2), round(log_cosh, 2)
 
 def xgboost_model(XGB_model, X_test, y_test):
     y_pred = XGB_model.predict(X_test)
@@ -45,7 +45,7 @@ def xgboost_model(XGB_model, X_test, y_test):
     rmse = mse ** 0.5
     mae = np.mean(np.abs(y_test - y_pred))
     log_cosh = logcosh(y_test, y_pred)
-    return rmse, mse, mae, log_cosh
+    return round(rmse, 2), round(mse, 2), round(mae, 2), round(log_cosh, 2)
 
 def neural_network_model(NN_model, X_test, y_test):
     X_test = X_test[['culture-values-stars', 'career-opportunities-stars', 'comp-benefit-stars', 'senior-management-stars',
@@ -55,7 +55,7 @@ def neural_network_model(NN_model, X_test, y_test):
     rmse = mse ** 0.5
     mae = np.mean(np.abs(y_test - y_pred))
     log_cosh = logcosh(y_test, y_pred)
-    return rmse, mse, mae, log_cosh
+    return round(rmse, 2), round(mse, 2), round(mae, 2), round(log_cosh, 2)
 
 def main():
     with open('models/random_forest_regressor.pkl', 'rb') as f:
@@ -72,11 +72,11 @@ def main():
     rmse_xgb, mse_xgb, mae_xgb, log_cosh_xgb = xgboost_model(XGB_model, X_test, y_test)
     rmse_nn, mse_nn, mae_nn, log_cosh_nn = neural_network_model(NN_model, X_test, y_test)
     print("Random Forest Regressor Scores")
-    print(round(rmse_rf, 2), round(mse_rf, 2), round(mae_rf, 2), round(log_cosh_rf, 2))
+    print(rmse_rf, mse_rf, mae_rf, log_cosh_rf)
     print("XGBoost Regressor Scores")
-    print(round(rmse_xgb, 2), round(mse_xgb, 2), round(mae_xgb, 2), round(log_cosh_xgb, 2))
+    print(rmse_xgb, mse_xgb, mae_xgb, log_cosh_xgb)
     print("Neural Network Scores")
-    print(round(rmse_nn, 2), round(mse_nn, 2), round(mae_nn, 2), round(log_cosh_nn, 2))
+    print(rmse_nn, mse_nn, mae_nn, log_cosh_nn)
 
 if __name__ == '__main__':
     main()
