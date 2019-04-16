@@ -30,11 +30,11 @@ venv\Scripts\activate
 ```
 Install the dependencies from the requirements.txt file:
 ```
-pip install -r dev_requirements.txt
+pip install -r requirements.txt
 ```
 If system directory permissions are denied, then run the following to install into a your home directory instead:
 ```
-pip install -r dev_requirements.txt --user
+pip install -r requirements.txt --user
 ```
 The python packages required for development are listed in dev_requirements.txt. The python packages needed for deployment are listed in requirements.txt .
 ## Running the unit tests
