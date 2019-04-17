@@ -83,13 +83,13 @@ def preprocessing_clean_glassdoor():
     glassdoor_df.to_csv('../data/clean_glassdoor_reviews.csv')
     return
 
-def preprocessing_create_amazon_with_earnings(glassdoor_filepath, amazon_earnings_filepath):
+def preprocessing_create_company_with_earnings(glassdoor_filepath, earnings_filepath, company):
     glassdoor_df = pd.read_csv(glassdoor_filepath)
-    q_earnings_df = pd.read_csv(amazon_earnings_filepath)
-    amazon_reviews_df = glassdoor_df[glassdoor_df['company'] == 'amazon']
+    q_earnings_df = pd.read_csv(earnings_filepath)
+    company_reviews_df = glassdoor_df[glassdoor_df['company'] == company]
     earnings_list = []
     stock_list = []
-    for _, row in amazon_reviews_df.iterrows():
+    for _, row in company_reviews_df.iterrows():
         net_income = q_earnings_df['Quarterly Net Income (Billions)'].loc[(q_earnings_df['Quarter'] == row['quarter']) & (q_earnings_df['Year'] == row['year'])]
         stock_price = q_earnings_df['Stock Price'].loc[(q_earnings_df['Quarter'] == row['quarter']) & (q_earnings_df['Year'] == row['year'])]
         if len(net_income.values) > 0:
@@ -99,8 +99,8 @@ def preprocessing_create_amazon_with_earnings(glassdoor_filepath, amazon_earning
         else:
             earnings_list.append(None)
             stock_list.append(None)
-    amazon_reviews_df['amazon_earnings_this_quarter'] = pd.Series(earnings_list)
-    amazon_reviews_df['stock_price'] = pd.Series(stock_list)
+    company_reviews_df['earnings_this_quarter'] = pd.Series(earnings_list)
+    company_reviews_df['stock_price'] = pd.Series(stock_list)
     # overall_mean = np.nanmean(amazon_reviews_df['overall-ratings'])
     # work_balance_mean = np.nanmean(amazon_reviews_df['work-balance-stars'])
     # culture_mean = np.nanmean(amazon_reviews_df['culture-values-stars'])
@@ -115,30 +115,30 @@ def preprocessing_create_amazon_with_earnings(glassdoor_filepath, amazon_earning
     senior_mean = 3
     # standardized
     incomplete_review = []
-    for i, row in amazon_reviews_df.iterrows():
+    for i, row in company_reviews_df.iterrows():
         is_null = 0
         if row['overall-ratings'] != row['overall-ratings']:
-            amazon_reviews_df.loc[i, 'overall-ratings'] = overall_mean
+            company_reviews_df.loc[i, 'overall-ratings'] = overall_mean
             is_null = 1
         if row['work-balance-stars'] != row['work-balance-stars']:
-            amazon_reviews_df.loc[i, 'work-balance-stars'] = work_balance_mean
+            company_reviews_df.loc[i, 'work-balance-stars'] = work_balance_mean
             is_null = 1
         if row['culture-values-stars'] != row['culture-values-stars']:
-            amazon_reviews_df.loc[i, 'culture-values-stars'] = culture_mean
+            company_reviews_df.loc[i, 'culture-values-stars'] = culture_mean
             is_null = 1
         if row['career-opportunities-stars'] != row['career-opportunities-stars']:
-            amazon_reviews_df.loc[i, 'career-opportunities-stars'] = career_mean
+            company_reviews_df.loc[i, 'career-opportunities-stars'] = career_mean
             is_null = 1
         if row['comp-benefit-stars'] != row['comp-benefit-stars']:
-            amazon_reviews_df.loc[i, 'comp-benefit-stars'] = benefit_mean
+            company_reviews_df.loc[i, 'comp-benefit-stars'] = benefit_mean
             is_null = 1
         if row['senior-management-stars'] != row['senior-management-stars']:
-            amazon_reviews_df.loc[i, 'senior-management-stars'] = senior_mean
+            company_reviews_df.loc[i, 'senior-management-stars'] = senior_mean
             is_null = 1
         incomplete_review.append(is_null)
-    amazon_reviews_df['incomplete_review'] = incomplete_review
+    company_reviews_df['incomplete_review'] = incomplete_review
 
-    amazon_reviews_df.to_csv('../data/clean_amazon_reviews.csv')
+    company_reviews_df.to_csv('../data/clean_' + company + '_reviews.csv')
 
 
 
@@ -201,16 +201,16 @@ def extract_bow_from_column(column):
             filtered_column.append(' '.join(tokens_stemporter[0]))
     return filtered_column
 
-def preprocessing_nlp(filepath):
-    """ filepath = ../data/clean_amazon_reviews.csv
-        creates the X and y csv files: df_with_nlp.csv and work-balance-stars.csv
+def preprocessing_nlp(filepath, company):
+    """ filepath = ../data/clean_company_reviews.csv
+        creates the X and y csv files: df_with_nlp_company.csv and work-balance-stars_company.csv
     """
-    amazon_df = pd.read_csv(filepath)
+    df = pd.read_csv(filepath)
 
     # PROS
-    amazon_df['pros'] = amazon_df['pros'].str.lower()
-    amazon_df['filtered_pros'] = extract_bow_from_column(amazon_df['pros'])
-    corpus_pros = [row for row in amazon_df['filtered_pros']]
+    df['pros'] = df['pros'].str.lower()
+    df['filtered_pros'] = extract_bow_from_column(df['pros'])
+    corpus_pros = [row for row in df['filtered_pros']]
     cv_pros = CountVectorizer(max_features=2000)
     cv_array_pros = cv_pros.fit_transform(corpus_pros).toarray()
     cv_dict_pros = {}
@@ -218,30 +218,30 @@ def preprocessing_nlp(filepath):
     for key in cv_pros.vocabulary_:
         cv_dict_pros["word_pro_" + key] = cv_array_pros[:,cv_pros.vocabulary_[key]]
     cv_df_pros = pd.DataFrame(cv_dict_pros)
-    with open('models/vectorizer_pros.pkl', 'wb') as f:
+    with open('models/vectorizer_pros_' + company + '.pkl', 'wb') as f:
         pickle.dump(cv_pros, f)
     # Add length of pro review as feature
-    amazon_df['pros_len'] = amazon_df['pros'].str.len()
+    df['pros_len'] = df['pros'].str.len()
 
     # CONS
-    amazon_df['cons'] = amazon_df['cons'].str.lower()
-    amazon_df['filtered_cons'] = extract_bow_from_column(amazon_df['cons'])
-    corpus_cons = [row for row in amazon_df['filtered_cons']]
+    df['cons'] = df['cons'].str.lower()
+    df['filtered_cons'] = extract_bow_from_column(df['cons'])
+    corpus_cons = [row for row in df['filtered_cons']]
     cv_cons = CountVectorizer(max_features=2000)
     cv_array_cons = cv_cons.fit_transform(corpus_cons).toarray()
     cv_dict_cons = {}
     for key in cv_cons.vocabulary_:
         cv_dict_cons["word_con_" + key] = cv_array_cons[:,cv_cons.vocabulary_[key]]
     cv_df_cons = pd.DataFrame(cv_dict_cons)
-    with open('models/vectorizer_cons.pkl', 'wb') as f:
+    with open('models/vectorizer_cons_' + company + '.pkl', 'wb') as f:
         pickle.dump(cv_cons, f)
     # Add length of con review as feature
-    amazon_df['cons_len'] = amazon_df['cons'].str.len()
+    df['cons_len'] = df['cons'].str.len()
 
     # Concat DFs
-    non_nlp_df = amazon_df[['culture-values-stars', 'career-opportunities-stars',
+    non_nlp_df = df[['culture-values-stars', 'career-opportunities-stars',
                        'comp-benefit-stars', 'senior-management-stars', 'helpful-count',
-                       'is_current_employee', 'year', 'quarter', 'amazon_earnings_this_quarter', 'stock_price', 'incomplete_review', 'pros_len', 'cons_len']]
+                       'is_current_employee', 'year', 'quarter', 'earnings_this_quarter', 'stock_price', 'incomplete_review', 'pros_len', 'cons_len']]
 
     new_df = pd.concat([non_nlp_df, cv_df_pros, cv_df_cons], axis=1)
     new_df['pro-con-len-ratio'] = new_df['pros_len']/new_df['cons_len']
@@ -249,11 +249,11 @@ def preprocessing_nlp(filepath):
 
     # Standardize Features
     scaled_features = new_df.copy()
-    col_names = ['helpful-count', 'amazon_earnings_this_quarter', 'stock_price', 'pros_len', 'cons_len', 'pro-con-len-ratio']
+    col_names = ['helpful-count', 'earnings_this_quarter', 'stock_price', 'pros_len', 'cons_len', 'pro-con-len-ratio']
     features = scaled_features[col_names]
     sc = StandardScaler()
     features = sc.fit_transform(features.values)
-    with open('models/standardizer.pkl', 'wb') as f:
+    with open('models/standardizer_' + company + '.pkl', 'wb') as f:
         pickle.dump(sc, f)
     scaled_features[col_names] = features
 
@@ -263,6 +263,6 @@ def preprocessing_nlp(filepath):
     #                                  columns=['culture-values-stars', 'career-opportunities-stars', 'comp-benefit-stars', 'senior-management-stars'])
 
     # new_df.sort_values(by=['timesteps'], inplace=True)
-    scaled_features.to_csv("../data/df_with_nlp.csv")
-    amazon_df['work-balance-stars'].to_csv("../data/work-balance-stars.csv")
+    scaled_features.to_csv("../data/df_with_nlp_" + company + ".csv")
+    df['work-balance-stars'].to_csv("../data/work-balance-stars_" + company + ".csv")
     return
