@@ -6,18 +6,19 @@ import pickle
 from sklearn.feature_extraction.text import CountVectorizer
 from preprocessing import filter_tokens, validate_string, extract_bow_from_column
 
-nlp_df = pd.read_csv('../data/df_with_nlp.csv', index_col=0)
+nlp_df = pd.read_csv('../data/df_with_nlp_amazon.csv', index_col=0)
 X = nlp_df
-y = pd.read_csv("../data/work-balance-stars.csv", header=None, index_col=0).values
+y = pd.read_csv("../data/work-balance-stars_amazon.csv", header=None, index_col=0).values
 
+company = "amazon"
 
-with open('models/gradient_boosting_regressor.pkl', 'rb') as f:
+with open('models/gradient_boosting_regressor_' + company + '.pkl', 'rb') as f:
     model = pickle.load(f)
-with open('models/vectorizer_pros.pkl', 'rb') as f:
+with open('models/vectorizer_pros_' + company + '.pkl', 'rb') as f:
     cv_pros = pickle.load(f)
-with open('models/vectorizer_cons.pkl', 'rb') as f:
+with open('models/vectorizer_cons_' + company + '.pkl', 'rb') as f:
     cv_cons = pickle.load(f)
-with open('models/standardizer.pkl', 'rb') as f:
+with open('models/standardizer_' + company + '.pkl', 'rb') as f:
     sc = pickle.load(f)
 
 app = Flask(__name__, static_url_path="")
